@@ -3,8 +3,8 @@
  * Basé sur: pression, solunar, golden hours, vent, couverture nuageuse
  */
 
-import { WeatherData, PressureTrend } from './weather';
-import { SolunarData, SolunarPeriod } from './solunar';
+import { WeatherData } from './weather';
+import { SolunarData, MajorPeriod, MinorPeriod } from './solunar';
 
 export interface ActivityData {
   score: number;        // 0-5
@@ -19,7 +19,7 @@ export interface ActivityData {
  * Retourne un nombre négatif si la période est en cours
  */
 function getMinutesUntilPeriod(
-  periods: SolunarPeriod[],
+  periods: (MajorPeriod | MinorPeriod)[],
   currentTime: Date
 ): { minutes: number; isOngoing: boolean } {
   for (const period of periods) {
