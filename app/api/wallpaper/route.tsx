@@ -112,14 +112,14 @@ export async function GET(request: Request) {
             position: 'relative',
           }}
         >
-          {/* Safe zone top */}
-          <div style={{ height: 200, display: 'flex' }} />
+          {/* Safe zone top - 300px pour éviter l'horloge iOS */}
+          <div style={{ height: 300, display: 'flex' }} />
 
           {/* Content area */}
           <div
             style={{
               flex: 1,
-              padding: '40px 70px',
+              padding: '20px 70px',
               display: 'flex',
               flexDirection: 'column',
             }}
@@ -167,7 +167,7 @@ export async function GET(request: Request) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                padding: '40px 0 50px',
+                padding: '30px 0 40px',
                 position: 'relative',
               }}
             >
@@ -223,9 +223,9 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 24,
+                      fontSize: 26,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.1em',
                       textTransform: 'uppercase',
                       marginBottom: 12,
@@ -256,9 +256,9 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 24,
+                      fontSize: 26,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.1em',
                       textTransform: 'uppercase',
                       marginBottom: 12,
@@ -302,20 +302,20 @@ export async function GET(request: Request) {
             </div>
 
             {/* Timeline Section */}
-            <div style={{ padding: '36px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 28,
+                  marginBottom: 24,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: 500,
-                    color: colors.textDim,
+                    color: colors.textMuted,
                     letterSpacing: '0.15em',
                     textTransform: 'uppercase',
                     marginRight: 20,
@@ -408,9 +408,9 @@ export async function GET(request: Request) {
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: 28,
+                          fontSize: 34,
                           fontWeight: 500,
-                          color: '#cbd5e1',
+                          color: colors.textSecondary,
                         }}
                       >
                         <span style={{ color: colors.accent }}>
@@ -423,10 +423,10 @@ export async function GET(request: Request) {
                       <div
                         style={{
                           display: 'flex',
-                          fontSize: 24,
+                          fontSize: 28,
                           fontWeight: 400,
-                          color: colors.textDim,
-                          marginTop: 8,
+                          color: colors.textMuted,
+                          marginTop: 6,
                         }}
                       >
                         ({Math.round(hour.windGusts)})
@@ -438,15 +438,15 @@ export async function GET(request: Request) {
                       style={{
                         display: 'flex',
                         justifyContent: 'center',
-                        marginTop: 12,
-                        paddingTop: 12,
+                        marginTop: 10,
+                        paddingTop: 10,
                         borderTop: '1px solid rgba(148,163,184,0.08)',
-                        fontSize: 24,
+                        fontSize: 28,
                         fontWeight: 500,
                         color:
                           hour.precipitation > 0
                             ? colors.accent
-                            : '#475569',
+                            : colors.textMuted,
                         width: '100%',
                       }}
                     >
@@ -468,20 +468,20 @@ export async function GET(request: Request) {
             />
 
             {/* Atmosphere Section */}
-            <div style={{ padding: '36px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 28,
+                  marginBottom: 24,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: 500,
-                    color: colors.textDim,
+                    color: colors.textMuted,
                     letterSpacing: '0.15em',
                     textTransform: 'uppercase',
                     marginRight: 20,
@@ -513,12 +513,12 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      marginBottom: 16,
+                      marginBottom: 14,
                     }}
                   >
                     Pression
@@ -572,12 +572,12 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      marginBottom: 16,
+                      marginBottom: 14,
                     }}
                   >
                     Nuages
@@ -617,12 +617,12 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      marginBottom: 16,
+                      marginBottom: 14,
                     }}
                   >
                     Précip.
@@ -665,20 +665,20 @@ export async function GET(request: Request) {
             />
 
             {/* Solunar Section */}
-            <div style={{ padding: '36px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 28,
+                  marginBottom: 24,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: 500,
-                    color: colors.textDim,
+                    color: colors.textMuted,
                     letterSpacing: '0.15em',
                     textTransform: 'uppercase',
                     marginRight: 20,
@@ -856,20 +856,20 @@ export async function GET(request: Request) {
             />
 
             {/* Sun times Section */}
-            <div style={{ padding: '36px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 28,
+                  marginBottom: 24,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: 500,
-                    color: colors.textDim,
+                    color: colors.textMuted,
                     letterSpacing: '0.15em',
                     textTransform: 'uppercase',
                     marginRight: 20,
@@ -917,12 +917,12 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      marginBottom: 12,
+                      marginBottom: 10,
                     }}
                   >
                     Lever
@@ -961,12 +961,12 @@ export async function GET(request: Request) {
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 400,
-                      color: colors.textDim,
+                      color: colors.textMuted,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      marginBottom: 12,
+                      marginBottom: 10,
                     }}
                   >
                     Coucher
@@ -986,8 +986,8 @@ export async function GET(request: Request) {
             </div>
           </div>
 
-          {/* Safe zone bottom */}
-          <div style={{ height: 300, display: 'flex' }} />
+          {/* Safe zone bottom - 280px pour éviter le dock iOS */}
+          <div style={{ height: 280, display: 'flex' }} />
         </div>
       ),
       {
