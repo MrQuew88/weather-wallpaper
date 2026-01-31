@@ -161,7 +161,7 @@ export default function Home() {
             </h2>
             <p className="text-gray-400">
               Configurez votre iPhone pour mettre à jour automatiquement
-              le fond d&apos;écran toutes les heures.
+              le fond d&apos;écran toutes les 2 heures.
             </p>
           </div>
 
@@ -248,7 +248,8 @@ export default function Home() {
                 </p>
                 <ul className="mt-2 space-y-1 text-sm">
                   <li>• Configurez l&apos;heure de début (ex: 6h00)</li>
-                  <li>• Activez <strong>Répéter</strong> → <strong>Toutes les heures</strong></li>
+                  <li>• Activez <strong>Répéter</strong> → <strong>Toutes les 2 heures</strong></li>
+                  <li>• Le wallpaper se mettra à jour automatiquement avec les nouvelles conditions</li>
                 </ul>
               </GuideStep>
 
