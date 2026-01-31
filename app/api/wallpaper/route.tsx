@@ -107,6 +107,7 @@ export async function GET(request: Request) {
             >
               <div
                 style={{
+                  display: 'flex',
                   fontSize: 42,
                   fontWeight: 600,
                   color: colors.textSecondary,
@@ -119,6 +120,7 @@ export async function GET(request: Request) {
               {region && (
                 <div
                   style={{
+                    display: 'flex',
                     fontSize: 28,
                     fontWeight: 400,
                     color: colors.textDim,
@@ -192,6 +194,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 24,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -204,6 +207,7 @@ export async function GET(request: Request) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 52,
                       fontWeight: 600,
                       color: colors.textSecondary,
@@ -223,6 +227,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 24,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -255,6 +260,7 @@ export async function GET(request: Request) {
               {/* Decorative line */}
               <div
                 style={{
+                  display: 'flex',
                   position: 'absolute',
                   bottom: 0,
                   left: '50%',
@@ -291,6 +297,7 @@ export async function GET(request: Request) {
                 </span>
                 <div
                   style={{
+                    display: 'flex',
                     flex: 1,
                     height: 1,
                     background: 'rgba(148,163,184,0.1)',
@@ -319,6 +326,7 @@ export async function GET(request: Request) {
                     {/* Top accent line */}
                     <div
                       style={{
+                        display: 'flex',
                         position: 'absolute',
                         top: 0,
                         left: '20%',
@@ -332,6 +340,7 @@ export async function GET(request: Request) {
                     {/* Hour */}
                     <div
                       style={{
+                        display: 'flex',
                         fontSize: 32,
                         fontWeight: 600,
                         color: colors.textMuted,
@@ -342,13 +351,14 @@ export async function GET(request: Request) {
                     </div>
 
                     {/* Weather icon */}
-                    <div style={{ fontSize: 52, marginBottom: 14 }}>
+                    <div style={{ display: 'flex', fontSize: 52, marginBottom: 14 }}>
                       {getWeatherEmoji(hour.weatherCode)}
                     </div>
 
                     {/* Temperature */}
                     <div
                       style={{
+                        display: 'flex',
                         fontSize: 46,
                         fontWeight: 700,
                         color: colors.textPrimary,
@@ -384,6 +394,7 @@ export async function GET(request: Request) {
                       </div>
                       <div
                         style={{
+                          display: 'flex',
                           fontSize: 24,
                           fontWeight: 400,
                           color: colors.textDim,
@@ -397,6 +408,8 @@ export async function GET(request: Request) {
                     {/* Rain */}
                     <div
                       style={{
+                        display: 'flex',
+                        justifyContent: 'center',
                         marginTop: 12,
                         paddingTop: 12,
                         borderTop: '1px solid rgba(148,163,184,0.08)',
@@ -407,7 +420,6 @@ export async function GET(request: Request) {
                             ? colors.accent
                             : '#475569',
                         width: '100%',
-                        textAlign: 'center',
                       }}
                     >
                       {hour.precipitation.toFixed(hour.precipitation > 0 ? 1 : 0)}mm
@@ -420,6 +432,7 @@ export async function GET(request: Request) {
             {/* Separator */}
             <div
               style={{
+                display: 'flex',
                 height: 1,
                 background:
                   'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
@@ -450,6 +463,7 @@ export async function GET(request: Request) {
                 </span>
                 <div
                   style={{
+                    display: 'flex',
                     flex: 1,
                     height: 1,
                     background: 'rgba(148,163,184,0.1)',
@@ -470,6 +484,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 22,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -528,6 +543,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 22,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -572,6 +588,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 22,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -612,6 +629,7 @@ export async function GET(request: Request) {
             {/* Separator */}
             <div
               style={{
+                display: 'flex',
                 height: 1,
                 background:
                   'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
@@ -642,6 +660,7 @@ export async function GET(request: Request) {
                 </span>
                 <div
                   style={{
+                    display: 'flex',
                     flex: 1,
                     height: 1,
                     background: 'rgba(148,163,184,0.1)',
@@ -695,6 +714,7 @@ export async function GET(request: Request) {
                   {/* Moon phase name */}
                   <div
                     style={{
+                      display: 'flex',
                       marginTop: 16,
                       fontSize: 24,
                       fontWeight: 500,
@@ -800,6 +820,7 @@ export async function GET(request: Request) {
             {/* Separator */}
             <div
               style={{
+                display: 'flex',
                 height: 1,
                 background:
                   'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
@@ -830,6 +851,7 @@ export async function GET(request: Request) {
                 </span>
                 <div
                   style={{
+                    display: 'flex',
                     flex: 1,
                     height: 1,
                     background: 'rgba(148,163,184,0.1)',
@@ -855,6 +877,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 48,
                       marginBottom: 16,
                       color: colors.accentWarm,
@@ -865,6 +888,7 @@ export async function GET(request: Request) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 22,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -877,6 +901,7 @@ export async function GET(request: Request) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 52,
                       fontWeight: 600,
                       color: colors.textSecondary,
@@ -896,6 +921,7 @@ export async function GET(request: Request) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 48,
                       marginBottom: 16,
                       color: colors.accentOrange,
@@ -906,6 +932,7 @@ export async function GET(request: Request) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 22,
                       fontWeight: 400,
                       color: colors.textDim,
@@ -918,6 +945,7 @@ export async function GET(request: Request) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: 52,
                       fontWeight: 600,
                       color: colors.textSecondary,
