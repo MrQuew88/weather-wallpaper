@@ -112,8 +112,8 @@ export async function GET(request: Request) {
             position: 'relative',
           }}
         >
-          {/* Safe zone top - 300px pour éviter l'horloge iOS */}
-          <div style={{ height: 300, display: 'flex' }} />
+          {/* Safe zone top - 350px pour éviter horloge iOS (statut+date+horloge+marge) */}
+          <div style={{ height: 350, display: 'flex', flexShrink: 0 }} />
 
           {/* Content area */}
           <div
@@ -130,13 +130,13 @@ export async function GET(request: Request) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                marginBottom: 24,
+                marginBottom: 16,
               }}
             >
               <div
                 style={{
                   display: 'flex',
-                  fontSize: 42,
+                  fontSize: 48,
                   fontWeight: 600,
                   color: colors.textSecondary,
                   letterSpacing: '0.02em',
@@ -149,10 +149,10 @@ export async function GET(request: Request) {
                 <div
                   style={{
                     display: 'flex',
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: 400,
                     color: colors.textDim,
-                    marginTop: 8,
+                    marginTop: 6,
                     letterSpacing: '0.05em',
                   }}
                 >
@@ -302,7 +302,7 @@ export async function GET(request: Request) {
             </div>
 
             {/* Timeline Section */}
-            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
@@ -313,7 +313,7 @@ export async function GET(request: Request) {
               >
                 <span
                   style={{
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: 500,
                     color: colors.textMuted,
                     letterSpacing: '0.15em',
@@ -343,11 +343,11 @@ export async function GET(request: Request) {
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.04)',
                       borderRadius: 20,
-                      padding: '28px 24px',
+                      padding: '20px 20px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      marginLeft: index > 0 ? 24 : 0,
+                      marginLeft: index > 0 ? 20 : 0,
                       position: 'relative',
                     }}
                   >
@@ -468,7 +468,7 @@ export async function GET(request: Request) {
             />
 
             {/* Atmosphere Section */}
-            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
@@ -479,7 +479,7 @@ export async function GET(request: Request) {
               >
                 <span
                   style={{
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: 500,
                     color: colors.textMuted,
                     letterSpacing: '0.15em',
@@ -665,7 +665,7 @@ export async function GET(request: Request) {
             />
 
             {/* Solunar Section */}
-            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
@@ -676,7 +676,7 @@ export async function GET(request: Request) {
               >
                 <span
                   style={{
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: 500,
                     color: colors.textMuted,
                     letterSpacing: '0.15em',
@@ -856,7 +856,7 @@ export async function GET(request: Request) {
             />
 
             {/* Sun times Section */}
-            <div style={{ padding: '28px 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
               {/* Section header */}
               <div
                 style={{
@@ -867,7 +867,7 @@ export async function GET(request: Request) {
               >
                 <span
                   style={{
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: 500,
                     color: colors.textMuted,
                     letterSpacing: '0.15em',
@@ -987,7 +987,7 @@ export async function GET(request: Request) {
           </div>
 
           {/* Safe zone bottom - 280px pour éviter le dock iOS */}
-          <div style={{ height: 280, display: 'flex' }} />
+          <div style={{ height: 280, display: 'flex', flexShrink: 0 }} />
         </div>
       ),
       {

@@ -244,8 +244,8 @@ export const colors = {
   bgMid: '#0a1628',
   textPrimary: '#ffffff',
   textSecondary: '#e2e8f0',
-  textMuted: '#94a3b8',
-  textDim: '#64748b',
+  textMuted: '#a1a1aa',    // Labels (RESSENTI, VENT...) - plus clair pour extérieur
+  textDim: '#71717a',      // Valeurs secondaires (rafales, 0mm) - plus clair
   accent: '#7dd3fc',
   accentWarm: '#fbbf24',
   accentOrange: '#f97316',
