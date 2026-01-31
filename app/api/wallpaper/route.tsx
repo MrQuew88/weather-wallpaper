@@ -482,17 +482,10 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Section Soleil */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {/* Header */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: px(6),
-                  marginBottom: px(12),
-                }}
-              >
+            {/* Section Soleil - layout horizontal */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: px(24) }}>
+              {/* Titre + divider */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: px(6) }}>
                 <span
                   style={{
                     fontSize: px(14),
@@ -504,46 +497,29 @@ export async function GET(request: Request) {
                 >
                   Soleil
                 </span>
-                <div style={{ flex: 1, height: 1, background: colors.divider, display: 'flex' }} />
+                <div style={{ width: px(10), height: 1, background: colors.divider, display: 'flex' }} />
               </div>
 
-              {/* Sun times */}
-              <div style={{ display: 'flex', gap: px(34), justifyContent: 'center' }}>
-                {/* Sunrise */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: px(4), alignItems: 'center' }}>
-                  <span style={{ fontSize: px(13), color: colors.accentYellow }}>◐</span>
-                  <span
-                    style={{
-                      fontSize: px(10),
-                      fontWeight: 400,
-                      color: colors.textDim,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Lever
-                  </span>
-                  <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
-                    {formatTime(solunar.sun.rise)}
-                  </span>
-                </div>
+              {/* Lever */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
+                <span style={{ fontSize: px(12), color: colors.accentYellow }}>●</span>
+                <span style={{ fontSize: px(10), fontWeight: 400, color: colors.textDim, textTransform: 'uppercase' }}>
+                  Lever
+                </span>
+                <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
+                  {formatTime(solunar.sun.rise)}
+                </span>
+              </div>
 
-                {/* Sunset */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: px(4), alignItems: 'center' }}>
-                  <span style={{ fontSize: px(13), color: colors.accentOrange }}>◑</span>
-                  <span
-                    style={{
-                      fontSize: px(10),
-                      fontWeight: 400,
-                      color: colors.textDim,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Coucher
-                  </span>
-                  <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
-                    {formatTime(solunar.sun.set)}
-                  </span>
-                </div>
+              {/* Coucher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
+                <span style={{ fontSize: px(12), color: colors.accentOrange }}>●</span>
+                <span style={{ fontSize: px(10), fontWeight: 400, color: colors.textDim, textTransform: 'uppercase' }}>
+                  Coucher
+                </span>
+                <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
+                  {formatTime(solunar.sun.set)}
+                </span>
               </div>
             </div>
           </div>
