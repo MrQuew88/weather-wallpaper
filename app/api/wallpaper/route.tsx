@@ -20,15 +20,21 @@ import {
 // Configuration edge runtime pour meilleures performances
 export const runtime = 'edge';
 
-// Dimensions du wallpaper (iPhone 15 Pro Max)
-const WIDTH = 1179;
-const HEIGHT = 2556;
+// Dimensions du wallpaper (iPhone 16 Pro Max - plus haute résolution)
+const WIDTH = 1320;
+const HEIGHT = 2868;
 
-// Safe zones et layout
-const SAFE_ZONE_TOP = 350;
-const SAFE_ZONE_BOTTOM = 300;
-const CONTENT_PADDING_X = 70;
-const SECTION_GAP = 70;
+// Safe zones en pourcentage (universel pour tous les iPhones)
+const SAFE_ZONE_TOP_PERCENT = 0.20;    // 20% du haut (date + horloge iOS)
+const SAFE_ZONE_BOTTOM_PERCENT = 0.13; // 13% du bas (dock + home indicator)
+
+// Calcul en pixels
+const safeZoneTop = Math.round(HEIGHT * SAFE_ZONE_TOP_PERCENT);      // ~574px
+const safeZoneBottom = Math.round(HEIGHT * SAFE_ZONE_BOTTOM_PERCENT); // ~373px
+const contentHeight = HEIGHT - safeZoneTop - safeZoneBottom;          // ~1921px
+
+// Layout
+const CONTENT_PADDING_X = 80;
 
 // Couleurs du design
 const colors = {
@@ -134,17 +140,17 @@ export async function GET(request: Request) {
             background: colors.bgGradient,
           }}
         >
-          {/* Safe zone top */}
-          <div style={{ height: SAFE_ZONE_TOP, display: 'flex', flexShrink: 0 }} />
+          {/* Safe zone top - 20% */}
+          <div style={{ height: safeZoneTop, flexShrink: 0, display: 'flex' }} />
 
-          {/* Contenu principal */}
+          {/* Contenu principal - 67% */}
           <div
             style={{
-              flex: 1,
+              height: contentHeight,
               display: 'flex',
               flexDirection: 'column',
               padding: `0 ${CONTENT_PADDING_X}px`,
-              gap: SECTION_GAP,
+              justifyContent: 'space-between',
             }}
           >
             {/* Location */}
@@ -801,8 +807,8 @@ export async function GET(request: Request) {
             </div>
           </div>
 
-          {/* Safe zone bottom */}
-          <div style={{ height: SAFE_ZONE_BOTTOM, display: 'flex', flexShrink: 0 }} />
+          {/* Safe zone bottom - 13% */}
+          <div style={{ height: safeZoneBottom, flexShrink: 0, display: 'flex' }} />
         </div>
       ),
       {
