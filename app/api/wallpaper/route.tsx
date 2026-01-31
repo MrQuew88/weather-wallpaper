@@ -47,6 +47,34 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Construire l'URL de base pour charger les fonts
+    const baseUrl = new URL(request.url).origin;
+
+    // Charger les fonts JetBrains Mono depuis le dossier public
+    const [fontRegular, fontMedium, fontSemiBold, fontBold, fontExtraBold] =
+      await Promise.all([
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Regular.woff2`).then((res) => {
+          if (!res.ok) throw new Error(`Font Regular: ${res.status}`);
+          return res.arrayBuffer();
+        }),
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Medium.woff2`).then((res) => {
+          if (!res.ok) throw new Error(`Font Medium: ${res.status}`);
+          return res.arrayBuffer();
+        }),
+        fetch(`${baseUrl}/fonts/JetBrainsMono-SemiBold.woff2`).then((res) => {
+          if (!res.ok) throw new Error(`Font SemiBold: ${res.status}`);
+          return res.arrayBuffer();
+        }),
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Bold.woff2`).then((res) => {
+          if (!res.ok) throw new Error(`Font Bold: ${res.status}`);
+          return res.arrayBuffer();
+        }),
+        fetch(`${baseUrl}/fonts/JetBrainsMono-ExtraBold.woff2`).then((res) => {
+          if (!res.ok) throw new Error(`Font ExtraBold: ${res.status}`);
+          return res.arrayBuffer();
+        }),
+      ]);
+
     // Récupération des données
     const weather = await getWeatherData(lat, lon);
     const solunar = getSolunarData(lat, lon, new Date());
@@ -79,7 +107,7 @@ export async function GET(request: Request) {
             height: HEIGHT,
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: 'JetBrains Mono',
             background: `linear-gradient(180deg, ${colors.bgDark} 0%, ${colors.bgMid} 30%, #0f1d2f 70%, #0d1926 100%)`,
             position: 'relative',
           }}
@@ -965,6 +993,38 @@ export async function GET(request: Request) {
       {
         width: WIDTH,
         height: HEIGHT,
+        fonts: [
+          {
+            name: 'JetBrains Mono',
+            data: fontRegular,
+            style: 'normal',
+            weight: 400,
+          },
+          {
+            name: 'JetBrains Mono',
+            data: fontMedium,
+            style: 'normal',
+            weight: 500,
+          },
+          {
+            name: 'JetBrains Mono',
+            data: fontSemiBold,
+            style: 'normal',
+            weight: 600,
+          },
+          {
+            name: 'JetBrains Mono',
+            data: fontBold,
+            style: 'normal',
+            weight: 700,
+          },
+          {
+            name: 'JetBrains Mono',
+            data: fontExtraBold,
+            style: 'normal',
+            weight: 800,
+          },
+        ],
       }
     );
   } catch (error) {
