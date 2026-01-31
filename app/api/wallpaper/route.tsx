@@ -122,6 +122,7 @@ export async function GET(request: Request) {
               display: 'flex',
               flexDirection: 'column',
               padding: `0 ${px(20)}px`,
+              paddingBottom: px(24),
               gap: px(20),
             }}
           >
