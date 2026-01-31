@@ -1,6 +1,7 @@
 /**
  * Route API pour la génération du fond d'écran météo
- * Utilise @vercel/og pour générer une image PNG dynamique
+ * Design basé sur le fichier Figma corrected-design.html
+ * Échelle: 330×716px → 1179×2556px (×3.57)
  */
 
 import { ImageResponse } from '@vercel/og';
@@ -14,7 +15,6 @@ import {
   getPressureTrendArrow,
   getNextPeriod,
   formatSolunarPeriod,
-  colors,
 } from '../../../lib/helpers';
 
 // Configuration edge runtime pour meilleures performances
@@ -24,56 +24,80 @@ export const runtime = 'edge';
 const WIDTH = 1179;
 const HEIGHT = 2556;
 
+// Safe zones et layout
+const SAFE_ZONE_TOP = 350;
+const SAFE_ZONE_BOTTOM = 300;
+const CONTENT_PADDING_X = 70;
+const SECTION_GAP = 70;
+
+// Couleurs du design
+const colors = {
+  // Background
+  bgGradient: 'linear-gradient(180deg, #0d1b2a 0%, #0a1628 30%, #0f1d2f 70%, #0d1926 100%)',
+
+  // Texte
+  textPrimary: '#fcfcfc',
+  textSecondary: '#d0d0d0',
+  textMuted: '#94a3b8',
+  textDim: '#64748b',
+  textWhite: '#ffffff',
+  textLight: '#e2e8f0',
+  textWindValue: '#cbd5e1',
+
+  // Accents
+  accentBlue: '#7dd3fc',
+  accentYellow: '#fbbf24',
+  accentOrange: '#f97316',
+  accentGreen: '#34d399',
+
+  // Cartes & séparateurs
+  cardBg: 'rgba(255, 255, 255, 0.02)',
+  cardBorder: 'rgba(255, 255, 255, 0.04)',
+  divider: 'rgba(148, 163, 184, 0.1)',
+  dividerLight: 'rgba(148, 163, 184, 0.08)',
+
+  // Lune
+  moonDark: '#1e293b',
+  moonLight: '#e2e8f0',
+};
+
 /**
  * Gestionnaire GET pour générer le fond d'écran
- * Query params:
- * - lat (required): latitude
- * - lon (required): longitude
- * - name (required): nom du lieu
- * - region (optional): région/pays
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
-  // Extraction des paramètres
   const lat = parseFloat(searchParams.get('lat') || '0');
   const lon = parseFloat(searchParams.get('lon') || '0');
   const name = searchParams.get('name') || 'Position';
   const region = searchParams.get('region') || '';
 
-  // Validation basique
   if (lat === 0 && lon === 0) {
     return new Response('Paramètres lat et lon requis', { status: 400 });
   }
 
   try {
-    // Construire l'URL de base pour charger les fonts
     const baseUrl = new URL(request.url).origin;
 
-    // Charger les fonts JetBrains Mono depuis le dossier public
-    const [fontRegular, fontMedium, fontSemiBold, fontBold, fontExtraBold] =
-      await Promise.all([
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Regular.ttf`).then((res) => {
-          if (!res.ok) throw new Error(`Font Regular: ${res.status}`);
-          return res.arrayBuffer();
-        }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Medium.ttf`).then((res) => {
-          if (!res.ok) throw new Error(`Font Medium: ${res.status}`);
-          return res.arrayBuffer();
-        }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-SemiBold.ttf`).then((res) => {
-          if (!res.ok) throw new Error(`Font SemiBold: ${res.status}`);
-          return res.arrayBuffer();
-        }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Bold.ttf`).then((res) => {
-          if (!res.ok) throw new Error(`Font Bold: ${res.status}`);
-          return res.arrayBuffer();
-        }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-ExtraBold.ttf`).then((res) => {
-          if (!res.ok) throw new Error(`Font ExtraBold: ${res.status}`);
-          return res.arrayBuffer();
-        }),
-      ]);
+    // Charger les fonts
+    const [fontRegular, fontMedium, fontBold, fontExtraBold] = await Promise.all([
+      fetch(`${baseUrl}/fonts/JetBrainsMono-Regular.ttf`).then((res) => {
+        if (!res.ok) throw new Error(`Font Regular: ${res.status}`);
+        return res.arrayBuffer();
+      }),
+      fetch(`${baseUrl}/fonts/JetBrainsMono-Medium.ttf`).then((res) => {
+        if (!res.ok) throw new Error(`Font Medium: ${res.status}`);
+        return res.arrayBuffer();
+      }),
+      fetch(`${baseUrl}/fonts/JetBrainsMono-Bold.ttf`).then((res) => {
+        if (!res.ok) throw new Error(`Font Bold: ${res.status}`);
+        return res.arrayBuffer();
+      }),
+      fetch(`${baseUrl}/fonts/JetBrainsMono-ExtraBold.ttf`).then((res) => {
+        if (!res.ok) throw new Error(`Font ExtraBold: ${res.status}`);
+        return res.arrayBuffer();
+      }),
+    ]);
 
     // Récupération des données
     const weather = await getWeatherData(lat, lon);
@@ -94,9 +118,8 @@ export async function GET(request: Request) {
       nextMinor?.status || null
     );
 
-    // Calculer le pourcentage illuminé pour la phase lunaire
+    // Calcul du gradient lunaire (illumination)
     const moonIllumination = solunar.moon.illumination;
-    // Pour le gradient de la lune : la partie illuminée va de 0% à 100%
     const moonGradientStop = 100 - moonIllumination;
 
     return new ImageResponse(
@@ -108,217 +131,67 @@ export async function GET(request: Request) {
             display: 'flex',
             flexDirection: 'column',
             fontFamily: 'JetBrains Mono',
-            background: `linear-gradient(180deg, ${colors.bgDark} 0%, ${colors.bgMid} 30%, #0f1d2f 70%, #0d1926 100%)`,
-            position: 'relative',
+            background: colors.bgGradient,
           }}
         >
-          {/* Safe zone top - 350px pour éviter horloge iOS (statut+date+horloge+marge) */}
-          <div style={{ height: 350, display: 'flex', flexShrink: 0 }} />
+          {/* Safe zone top */}
+          <div style={{ height: SAFE_ZONE_TOP, display: 'flex', flexShrink: 0 }} />
 
-          {/* Content area */}
+          {/* Contenu principal */}
           <div
             style={{
               flex: 1,
-              padding: '20px 70px',
               display: 'flex',
               flexDirection: 'column',
+              padding: `0 ${CONTENT_PADDING_X}px`,
+              gap: SECTION_GAP,
             }}
           >
             {/* Location */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                marginBottom: 16,
-              }}
-            >
-              <div
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              <span
                 style={{
-                  display: 'flex',
-                  fontSize: 48,
-                  fontWeight: 600,
-                  color: colors.textSecondary,
-                  letterSpacing: '0.02em',
+                  fontSize: 57,
+                  fontWeight: 800,
+                  color: colors.textPrimary,
+                  letterSpacing: 0.8,
                   textTransform: 'uppercase',
                 }}
               >
                 {name}
-              </div>
+              </span>
               {region && (
-                <div
+                <span
                   style={{
-                    display: 'flex',
-                    fontSize: 32,
+                    fontSize: 43,
                     fontWeight: 400,
-                    color: colors.textDim,
-                    marginTop: 6,
-                    letterSpacing: '0.05em',
+                    color: colors.textSecondary,
+                    letterSpacing: 1.4,
                   }}
                 >
                   {region}
-                </div>
+                </span>
               )}
             </div>
 
-            {/* Hero: Current Conditions */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '30px 0 40px',
-                position: 'relative',
-              }}
-            >
-              {/* Temperature main */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  lineHeight: 0.85,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 280,
-                    fontWeight: 800,
-                    color: colors.textPrimary,
-                    letterSpacing: '-0.04em',
-                  }}
-                >
-                  {Math.round(weather.current.temperature)}
-                </span>
-                <span
-                  style={{
-                    fontSize: 120,
-                    fontWeight: 500,
-                    color: colors.textPrimary,
-                    opacity: 0.7,
-                    marginLeft: -10,
-                    marginTop: 20,
-                  }}
-                >
-                  °
-                </span>
-              </div>
-
-              {/* Hero details */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginTop: 28,
-                }}
-              >
-                {/* Ressenti */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    marginRight: 80,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: 26,
-                      fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      marginBottom: 12,
-                    }}
-                  >
-                    Ressenti
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: 52,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
-                    }}
-                  >
-                    {Math.round(weather.current.feelsLike)}°
-                  </div>
-                </div>
-
-                {/* Vent */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: 26,
-                      fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      marginBottom: 12,
-                    }}
-                  >
-                    Vent
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontSize: 52,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
-                    }}
-                  >
-                    {Math.round(weather.current.windSpeed)}
-                    <span
-                      style={{ color: colors.accent, marginLeft: 8 }}
-                    >
-                      {getWindArrow(weather.current.windDirection)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Decorative line */}
-              <div
-                style={{
-                  display: 'flex',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 200,
-                  height: 1,
-                  background:
-                    'linear-gradient(90deg, transparent, rgba(148,163,184,0.3), transparent)',
-                }}
-              />
-            </div>
-
-            {/* Timeline Section */}
-            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
-              {/* Section header */}
+            {/* Section Prévisions */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 24,
+                  gap: 21,
+                  marginBottom: 43,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 30,
-                    fontWeight: 500,
-                    color: colors.textMuted,
-                    letterSpacing: '0.15em',
+                    fontSize: 50,
+                    fontWeight: 800,
+                    color: colors.textPrimary,
+                    letterSpacing: 4,
                     textTransform: 'uppercase',
-                    marginRight: 20,
                   }}
                 >
                   Prévisions
@@ -328,163 +201,148 @@ export async function GET(request: Request) {
                     display: 'flex',
                     flex: 1,
                     height: 1,
-                    background: 'rgba(148,163,184,0.1)',
+                    background: colors.divider,
                   }}
                 />
               </div>
 
-              {/* Timeline grid (flexbox instead of grid) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {/* Cartes prévisions */}
+              <div style={{ display: 'flex', gap: 25, justifyContent: 'center' }}>
                 {weather.hourly.slice(0, 3).map((hour, index) => (
                   <div
                     key={index}
                     style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.04)',
-                      borderRadius: 20,
-                      padding: '20px 20px',
+                      width: 328,
+                      background: colors.cardBg,
+                      border: `1px solid ${colors.cardBorder}`,
+                      borderRadius: 71,
+                      padding: '28px 25px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      marginLeft: index > 0 ? 20 : 0,
-                      position: 'relative',
+                      gap: 14,
                     }}
                   >
-                    {/* Top accent line */}
-                    <div
+                    {/* Heure */}
+                    <span
                       style={{
-                        display: 'flex',
-                        position: 'absolute',
-                        top: 0,
-                        left: '20%',
-                        width: '60%',
-                        height: 1,
-                        background:
-                          'linear-gradient(90deg, transparent, rgba(125,211,252,0.2), transparent)',
-                      }}
-                    />
-
-                    {/* Hour */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        fontSize: 32,
-                        fontWeight: 600,
+                        fontSize: 43,
+                        fontWeight: 700,
                         color: colors.textMuted,
-                        marginBottom: 14,
                       }}
                     >
                       {formatHourFromISO(hour.time)}
-                    </div>
+                    </span>
 
-                    {/* Weather icon */}
-                    <div style={{ display: 'flex', fontSize: 52, marginBottom: 14 }}>
+                    {/* Icône météo */}
+                    <span style={{ fontSize: 54 }}>
                       {getWeatherEmoji(hour.weatherCode)}
-                    </div>
+                    </span>
 
-                    {/* Temperature */}
-                    <div
+                    {/* Température */}
+                    <span
                       style={{
-                        display: 'flex',
-                        fontSize: 46,
-                        fontWeight: 700,
-                        color: colors.textPrimary,
-                        marginBottom: 18,
+                        fontSize: 50,
+                        fontWeight: 800,
+                        color: colors.textWhite,
                       }}
                     >
                       {Math.round(hour.temperature)}°
-                    </div>
+                    </span>
 
-                    {/* Wind */}
+                    {/* Vent */}
                     <div
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        gap: 7,
                       }}
                     >
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: 34,
-                          fontWeight: 500,
-                          color: colors.textSecondary,
+                          gap: 7,
                         }}
                       >
-                        <span style={{ color: colors.accent }}>
+                        <span
+                          style={{
+                            fontSize: 43,
+                            color: colors.accentBlue,
+                          }}
+                        >
                           {getWindArrow(hour.windDirection)}
                         </span>
-                        <span style={{ marginLeft: 4 }}>
+                        <span
+                          style={{
+                            fontSize: 43,
+                            fontWeight: 700,
+                            color: colors.textWindValue,
+                          }}
+                        >
                           {Math.round(hour.windSpeed)}
                         </span>
                       </div>
-                      <div
+                      <span
                         style={{
-                          display: 'flex',
-                          fontSize: 28,
+                          fontSize: 36,
                           fontWeight: 400,
-                          color: colors.textMuted,
-                          marginTop: 6,
+                          color: colors.textSecondary,
                         }}
                       >
                         ({Math.round(hour.windGusts)})
-                      </div>
+                      </span>
                     </div>
 
-                    {/* Rain */}
+                    {/* Précipitations */}
                     <div
                       style={{
                         display: 'flex',
-                        justifyContent: 'center',
-                        marginTop: 10,
-                        paddingTop: 10,
-                        borderTop: '1px solid rgba(148,163,184,0.08)',
-                        fontSize: 28,
-                        fontWeight: 500,
-                        color:
-                          hour.precipitation > 0
-                            ? colors.accent
-                            : colors.textMuted,
                         width: '100%',
+                        paddingTop: 11,
+                        borderTop: `1px solid ${colors.dividerLight}`,
+                        justifyContent: 'center',
                       }}
                     >
-                      {hour.precipitation.toFixed(hour.precipitation > 0 ? 1 : 0)}mm
+                      <span
+                        style={{
+                          fontSize: 43,
+                          fontWeight: 500,
+                          color:
+                            hour.precipitation > 0
+                              ? colors.accentBlue
+                              : colors.textMuted,
+                        }}
+                      >
+                        {hour.precipitation > 0
+                          ? `${hour.precipitation.toFixed(1)}mm`
+                          : '0mm'}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Separator */}
-            <div
-              style={{
-                display: 'flex',
-                height: 1,
-                background:
-                  'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
-              }}
-            />
-
-            {/* Atmosphere Section */}
-            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
-              {/* Section header */}
+            {/* Section Atmosphère */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 24,
+                  gap: 21,
+                  marginBottom: 43,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 30,
-                    fontWeight: 500,
-                    color: colors.textMuted,
-                    letterSpacing: '0.15em',
+                    fontSize: 50,
+                    fontWeight: 800,
+                    color: colors.textPrimary,
+                    letterSpacing: 4,
                     textTransform: 'uppercase',
-                    marginRight: 20,
                   }}
                 >
                   Atmosphère
@@ -494,48 +352,47 @@ export async function GET(request: Request) {
                     display: 'flex',
                     flex: 1,
                     height: 1,
-                    background: 'rgba(148,163,184,0.1)',
+                    background: colors.divider,
                   }}
                 />
               </div>
 
-              {/* Atmosphere grid */}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {/* Grille atmosphère */}
+              <div style={{ display: 'flex', gap: 40, justifyContent: 'center' }}>
                 {/* Pression */}
                 <div
                   style={{
-                    flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 16,
+                    width: 320,
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 24,
+                      fontSize: 36,
                       fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.08em',
+                      color: colors.textSecondary,
+                      letterSpacing: 1.8,
                       textTransform: 'uppercase',
-                      marginBottom: 14,
                     }}
                   >
                     Pression
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontSize: 44,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
-                    }}
-                  >
-                    {Math.round(weather.current.pressure)}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'baseline' }}>
                     <span
                       style={{
-                        fontSize: 28,
+                        fontSize: 43,
+                        fontWeight: 800,
+                        color: colors.textPrimary,
+                      }}
+                    >
+                      {Math.round(weather.current.pressure)}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 29,
                         fontWeight: 400,
                         color: colors.textMuted,
                         marginLeft: 4,
@@ -546,13 +403,9 @@ export async function GET(request: Request) {
                     <span
                       style={{
                         fontSize: 36,
-                        marginLeft: 12,
-                        color:
-                          weather.pressureTrend === 'rising'
-                            ? colors.success
-                            : weather.pressureTrend === 'falling'
-                              ? colors.error
-                              : colors.textMuted,
+                        fontWeight: 700,
+                        color: colors.accentGreen,
+                        marginLeft: 8,
                       }}
                     >
                       {getPressureTrendArrow(weather.pressureTrend)}
@@ -563,38 +416,37 @@ export async function GET(request: Request) {
                 {/* Nuages */}
                 <div
                   style={{
-                    flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 16,
+                    width: 320,
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 24,
+                      fontSize: 36,
                       fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.08em',
+                      color: colors.textSecondary,
+                      letterSpacing: 1.8,
                       textTransform: 'uppercase',
-                      marginBottom: 14,
                     }}
                   >
                     Nuages
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontSize: 44,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
-                    }}
-                  >
-                    {weather.current.cloudCover}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'baseline' }}>
                     <span
                       style={{
-                        fontSize: 28,
+                        fontSize: 43,
+                        fontWeight: 800,
+                        color: colors.textPrimary,
+                      }}
+                    >
+                      {weather.current.cloudCover}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 29,
                         fontWeight: 400,
                         color: colors.textMuted,
                         marginLeft: 4,
@@ -605,43 +457,42 @@ export async function GET(request: Request) {
                   </div>
                 </div>
 
-                {/* Précip. */}
+                {/* Précipitations */}
                 <div
                   style={{
-                    flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 16,
+                    width: 320,
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 24,
+                      fontSize: 36,
                       fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.08em',
+                      color: colors.textSecondary,
+                      letterSpacing: 1.8,
                       textTransform: 'uppercase',
-                      marginBottom: 14,
                     }}
                   >
                     Précip.
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontSize: 44,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
-                    }}
-                  >
-                    {weather.current.precipitation.toFixed(
-                      weather.current.precipitation > 0 ? 1 : 0
-                    )}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'baseline' }}>
                     <span
                       style={{
-                        fontSize: 28,
+                        fontSize: 43,
+                        fontWeight: 800,
+                        color: colors.textPrimary,
+                      }}
+                    >
+                      {weather.current.precipitation > 0
+                        ? weather.current.precipitation.toFixed(1)
+                        : '0'}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 29,
                         fontWeight: 400,
                         color: colors.textMuted,
                         marginLeft: 4,
@@ -654,34 +505,24 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Separator */}
-            <div
-              style={{
-                display: 'flex',
-                height: 1,
-                background:
-                  'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
-              }}
-            />
-
-            {/* Solunar Section */}
-            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
-              {/* Section header */}
+            {/* Section Solunar */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 24,
+                  gap: 21,
+                  marginBottom: 43,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 30,
-                    fontWeight: 500,
-                    color: colors.textMuted,
-                    letterSpacing: '0.15em',
+                    fontSize: 50,
+                    fontWeight: 800,
+                    color: colors.textPrimary,
+                    letterSpacing: 4,
                     textTransform: 'uppercase',
-                    marginRight: 20,
                   }}
                 >
                   Solunar
@@ -691,35 +532,34 @@ export async function GET(request: Request) {
                     display: 'flex',
                     flex: 1,
                     height: 1,
-                    background: 'rgba(148,163,184,0.1)',
+                    background: colors.divider,
                   }}
                 />
               </div>
 
-              {/* Solunar content */}
+              {/* Contenu Solunar */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: 57,
                 }}
               >
-                {/* Moon visual */}
+                {/* Lune */}
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    marginRight: 60,
                   }}
                 >
-                  {/* Moon circle */}
                   <div
                     style={{
-                      width: 180,
-                      height: 180,
+                      width: 178,
+                      height: 178,
                       borderRadius: '50%',
-                      background: `linear-gradient(90deg, #1e293b 0%, #1e293b ${moonGradientStop}%, #e2e8f0 ${moonGradientStop}%, #e2e8f0 100%)`,
+                      background: `linear-gradient(90deg, ${colors.moonDark} 0%, ${colors.moonDark} ${moonGradientStop}%, ${colors.moonLight} ${moonGradientStop}%, ${colors.moonLight} 100%)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -731,111 +571,104 @@ export async function GET(request: Request) {
                       style={{
                         fontSize: 36,
                         fontWeight: 700,
-                        color: '#1e293b',
+                        color: colors.moonDark,
                         textShadow: '0 1px 2px rgba(255,255,255,0.3)',
                       }}
                     >
                       {moonIllumination}%
                     </span>
                   </div>
-
-                  {/* Moon phase name */}
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      marginTop: 16,
-                      fontSize: 24,
+                      marginTop: 14,
+                      fontSize: 25,
                       fontWeight: 500,
                       color: colors.textMuted,
                     }}
                   >
                     {solunar.moon.phaseName}
-                  </div>
+                  </span>
                 </div>
 
-                {/* Solunar periods */}
+                {/* Périodes */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {/* Major period */}
+                  {/* Majeure */}
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '20px 0',
-                      borderBottom: '1px solid rgba(148,163,184,0.08)',
+                      gap: 25,
+                      paddingBottom: 21,
+                      borderBottom: `1px solid ${colors.dividerLight}`,
                     }}
                   >
                     <span
                       style={{
-                        width: 140,
-                        fontSize: 22,
+                        fontSize: 36,
                         fontWeight: 500,
-                        color: colors.accentWarm,
+                        color: colors.accentYellow,
+                        letterSpacing: 1.8,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
                       }}
                     >
                       Majeure
                     </span>
                     <span
                       style={{
-                        fontSize: 44,
-                        fontWeight: 700,
-                        color: colors.textPrimary,
+                        fontSize: 50,
+                        fontWeight: 800,
+                        color: colors.textWhite,
                         minWidth: 160,
-                        marginLeft: 24,
                       }}
                     >
                       {majorDisplay.time}
                     </span>
                     <span
                       style={{
-                        fontSize: 28,
+                        fontSize: 36,
                         fontWeight: 400,
                         color: colors.textMuted,
-                        marginLeft: 24,
                       }}
                     >
                       {majorDisplay.countdown}
                     </span>
                   </div>
 
-                  {/* Minor period */}
+                  {/* Mineure */}
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '20px 0',
+                      gap: 25,
+                      paddingTop: 21,
                     }}
                   >
                     <span
                       style={{
-                        width: 140,
-                        fontSize: 22,
+                        fontSize: 36,
                         fontWeight: 500,
                         color: colors.textDim,
+                        letterSpacing: 1.8,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
                       }}
                     >
                       Mineure
                     </span>
                     <span
                       style={{
-                        fontSize: 44,
-                        fontWeight: 700,
-                        color: colors.textPrimary,
+                        fontSize: 50,
+                        fontWeight: 800,
+                        color: colors.textWhite,
                         minWidth: 160,
-                        marginLeft: 24,
                       }}
                     >
                       {minorDisplay.time}
                     </span>
                     <span
                       style={{
-                        fontSize: 28,
+                        fontSize: 36,
                         fontWeight: 400,
                         color: colors.textMuted,
-                        marginLeft: 24,
                       }}
                     >
                       {minorDisplay.countdown}
@@ -845,34 +678,24 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Separator */}
-            <div
-              style={{
-                display: 'flex',
-                height: 1,
-                background:
-                  'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.15) 20%, rgba(148,163,184,0.15) 80%, transparent 100%)',
-              }}
-            />
-
-            {/* Sun times Section */}
-            <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
-              {/* Section header */}
+            {/* Section Soleil */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: 24,
+                  gap: 21,
+                  marginBottom: 43,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 30,
-                    fontWeight: 500,
-                    color: colors.textMuted,
-                    letterSpacing: '0.15em',
+                    fontSize: 50,
+                    fontWeight: 800,
+                    color: colors.textPrimary,
+                    letterSpacing: 4,
                     textTransform: 'uppercase',
-                    marginRight: 20,
                   }}
                 >
                   Soleil
@@ -882,112 +705,104 @@ export async function GET(request: Request) {
                     display: 'flex',
                     flex: 1,
                     height: 1,
-                    background: 'rgba(148,163,184,0.1)',
+                    background: colors.divider,
                   }}
                 />
               </div>
 
-              {/* Sun times */}
+              {/* Lever / Coucher */}
               <div
                 style={{
                   display: 'flex',
+                  gap: 120,
                   justifyContent: 'center',
                 }}
               >
-                {/* Sunrise */}
+                {/* Lever */}
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    marginRight: 120,
+                    gap: 14,
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 48,
-                      marginBottom: 16,
-                      color: colors.accentWarm,
+                      fontSize: 46,
+                      color: colors.accentYellow,
                       opacity: 0.9,
                     }}
                   >
                     ◐
-                  </div>
-                  <div
+                  </span>
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 24,
+                      fontSize: 36,
                       fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.08em',
+                      color: colors.textDim,
+                      letterSpacing: 1.8,
                       textTransform: 'uppercase',
-                      marginBottom: 10,
                     }}
                   >
                     Lever
-                  </div>
-                  <div
+                  </span>
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 52,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
+                      fontSize: 50,
+                      fontWeight: 700,
+                      color: colors.textLight,
                     }}
                   >
                     {formatTime(solunar.sun.rise)}
-                  </div>
+                  </span>
                 </div>
 
-                {/* Sunset */}
+                {/* Coucher */}
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 14,
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 48,
-                      marginBottom: 16,
+                      fontSize: 46,
                       color: colors.accentOrange,
                       opacity: 0.9,
                     }}
                   >
                     ◑
-                  </div>
-                  <div
+                  </span>
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 24,
+                      fontSize: 36,
                       fontWeight: 400,
-                      color: colors.textMuted,
-                      letterSpacing: '0.08em',
+                      color: colors.textDim,
+                      letterSpacing: 1.8,
                       textTransform: 'uppercase',
-                      marginBottom: 10,
                     }}
                   >
                     Coucher
-                  </div>
-                  <div
+                  </span>
+                  <span
                     style={{
-                      display: 'flex',
-                      fontSize: 52,
-                      fontWeight: 600,
-                      color: colors.textSecondary,
+                      fontSize: 50,
+                      fontWeight: 700,
+                      color: colors.textLight,
                     }}
                   >
                     {formatTime(solunar.sun.set)}
-                  </div>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Safe zone bottom - 280px pour éviter le dock iOS */}
-          <div style={{ height: 280, display: 'flex', flexShrink: 0 }} />
+          {/* Safe zone bottom */}
+          <div style={{ height: SAFE_ZONE_BOTTOM, display: 'flex', flexShrink: 0 }} />
         </div>
       ),
       {
@@ -1005,12 +820,6 @@ export async function GET(request: Request) {
             data: fontMedium,
             style: 'normal',
             weight: 500,
-          },
-          {
-            name: 'JetBrains Mono',
-            data: fontSemiBold,
-            style: 'normal',
-            weight: 600,
           },
           {
             name: 'JetBrains Mono',
