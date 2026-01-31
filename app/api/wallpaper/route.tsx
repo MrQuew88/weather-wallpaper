@@ -5,17 +5,17 @@
  */
 
 import { ImageResponse } from '@vercel/og';
-import { getWeatherData, getWaterTemperature } from '../../../lib/weather';
+import { getWeatherData } from '../../../lib/weather';
 import { getSolunarData } from '../../../lib/solunar';
 import { calculatePikeActivity, getGoldenHours } from '../../../lib/activity';
 import {
-  getWindArrow,
   getWeatherEmoji,
   formatTime,
   formatHourFromISO,
   getPressureTrendArrow,
   getNextPeriod,
   formatSolunarPeriod,
+  getWindDirectionLabel,
 } from '../../../lib/helpers';
 
 export const runtime = 'edge';
@@ -93,7 +93,6 @@ export async function GET(request: Request) {
     // Récupération des données
     const weather = await getWeatherData(lat, lon);
     const solunar = getSolunarData(lat, lon, new Date());
-    const waterTemp = await getWaterTemperature(lat, lon);
     const now = new Date();
 
     // Calcul de l'indice d'activité brochet
@@ -108,11 +107,6 @@ export async function GET(request: Request) {
 
     const moonIllumination = solunar.moon.illumination;
     const moonGradientStop = 100 - moonIllumination;
-
-    // Formatage des golden hours
-    const formatGoldenRange = (start: Date, end: Date) => {
-      return `${formatTime(start)}-${formatTime(end)}`;
-    };
 
     return new ImageResponse(
       (
@@ -237,7 +231,7 @@ export async function GET(request: Request) {
                 <div style={{ flex: 1, height: 1, background: colors.divider, display: 'flex' }} />
               </div>
 
-              {/* Forecast cards */}
+              {/* Forecast cards - Layout compact */}
               <div style={{ display: 'flex', gap: px(7), justifyContent: 'center' }}>
                 {weather.hourly.slice(0, 3).map((hour, index) => (
                   <div
@@ -250,37 +244,39 @@ export async function GET(request: Request) {
                       padding: `${px(8)}px ${px(7)}px`,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: px(4),
                       alignItems: 'center',
+                      gap: px(4),
                     }}
                   >
-                    {/* Time */}
-                    <span style={{ fontSize: px(12), fontWeight: 700, color: colors.textMuted }}>
+                    {/* Heure */}
+                    <span style={{ fontSize: px(11), fontWeight: 700, color: colors.textMuted }}>
                       {formatHourFromISO(hour.time)}
                     </span>
 
-                    {/* Icon */}
-                    <span style={{ fontSize: px(15) }}>
-                      {getWeatherEmoji(hour.weatherCode)}
-                    </span>
-
-                    {/* Temp */}
-                    <span style={{ fontSize: px(14), fontWeight: 800, color: colors.textWhite }}>
-                      {Math.round(hour.temperature)}°
-                    </span>
-
-                    {/* Wind direction */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: px(2), fontSize: px(12) }}>
-                      <span style={{ color: colors.accentBlue }}>{getWindArrow(hour.windDirection)}</span>
-                      <span style={{ color: colors.textWind, fontWeight: 700 }}>{Math.round(hour.windSpeed)}</span>
+                    {/* Icône + Température — HORIZONTAL */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
+                      <span style={{ fontSize: px(12) }}>
+                        {getWeatherEmoji(hour.weatherCode)}
+                      </span>
+                      <span style={{ fontSize: px(13), fontWeight: 800, color: colors.textWhite }}>
+                        {Math.round(hour.temperature)}°
+                      </span>
                     </div>
 
-                    {/* Wind gust */}
-                    <span style={{ fontSize: px(10), fontWeight: 400, color: colors.textSecondary }}>
-                      ({Math.round(hour.windGusts)})
-                    </span>
+                    {/* Vent + Rafales + Direction — HORIZONTAL */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: px(2) }}>
+                      <span style={{ fontSize: px(10), fontWeight: 700, color: colors.accentBlue }}>
+                        {Math.round(hour.windSpeed)}
+                      </span>
+                      <span style={{ fontSize: px(9), color: colors.textDim }}>
+                        ({Math.round(hour.windGusts)})
+                      </span>
+                      <span style={{ fontSize: px(9), fontWeight: 600, color: colors.textMuted }}>
+                        {getWindDirectionLabel(hour.windDirection)}
+                      </span>
+                    </div>
 
-                    {/* Precip */}
+                    {/* Précipitations */}
                     <div
                       style={{
                         display: 'flex',
@@ -292,7 +288,7 @@ export async function GET(request: Request) {
                     >
                       <span
                         style={{
-                          fontSize: px(12),
+                          fontSize: px(10),
                           fontWeight: 500,
                           color: hour.precipitation > 0 ? colors.accentBlue : colors.textMuted,
                         }}
@@ -330,12 +326,12 @@ export async function GET(request: Request) {
                 <div style={{ flex: 1, height: 1, background: colors.divider, display: 'flex' }} />
               </div>
 
-              {/* Grid */}
+              {/* Grid - 3 colonnes seulement */}
               <div style={{ display: 'flex', gap: px(11), justifyContent: 'center' }}>
                 {/* Pression */}
                 <div
                   style={{
-                    width: waterTemp !== null ? px(68) : px(90),
+                    width: px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -369,7 +365,7 @@ export async function GET(request: Request) {
                 {/* Nuages */}
                 <div
                   style={{
-                    width: waterTemp !== null ? px(68) : px(90),
+                    width: px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -400,7 +396,7 @@ export async function GET(request: Request) {
                 {/* Précip */}
                 <div
                   style={{
-                    width: waterTemp !== null ? px(68) : px(90),
+                    width: px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -427,39 +423,6 @@ export async function GET(request: Request) {
                     </span>
                   </div>
                 </div>
-
-                {/* Eau (si disponible) */}
-                {waterTemp !== null && (
-                  <div
-                    style={{
-                      width: px(68),
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: px(4),
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: px(10),
-                        fontWeight: 400,
-                        color: colors.textSecondary,
-                        textTransform: 'uppercase',
-                        letterSpacing: px(0.5),
-                      }}
-                    >
-                      Eau
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: px(12), fontWeight: 800, color: colors.accentBlue }}>
-                        {Math.round(waterTemp)}
-                      </span>
-                      <span style={{ fontSize: px(8), fontWeight: 400, color: colors.textMuted, marginLeft: 2 }}>
-                        °C
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -574,9 +537,9 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Section Soleil - layout horizontal avec golden hours */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: px(16) }}>
-              {/* Titre + divider */}
+            {/* Section Soleil - layout vertical */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: px(5) }}>
+              {/* Header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: px(6) }}>
                 <span
                   style={{
@@ -589,41 +552,42 @@ export async function GET(request: Request) {
                 >
                   Soleil
                 </span>
-                <div style={{ width: px(10), height: 1, background: colors.divider, display: 'flex' }} />
+                <div style={{ flex: 1, height: 1, background: colors.divider, display: 'flex' }} />
               </div>
 
-              {/* Lever + Golden */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
-                <span style={{ fontSize: px(12), color: colors.accentYellow }}>●</span>
-                <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
-                  {formatTime(solunar.sun.rise)}
-                </span>
-                <span
-                  style={{
-                    fontSize: px(8),
-                    fontWeight: 400,
-                    color: activity.isGoldenHour ? colors.accentYellow : colors.textDim,
-                  }}
-                >
-                  ({formatGoldenRange(goldenHours.morningStart, goldenHours.morningEnd)})
-                </span>
-              </div>
+              {/* Contenu — 2 colonnes */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: px(20) }}>
+                {/* Lever */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: px(2) }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
+                    <span style={{ fontSize: px(12), color: colors.accentYellow }}>●</span>
+                    <span style={{ fontSize: px(9), fontWeight: 500, color: colors.textDim, textTransform: 'uppercase' }}>
+                      Lever
+                    </span>
+                  </div>
+                  <span style={{ fontSize: px(13), fontWeight: 700, color: colors.textLight }}>
+                    {formatTime(solunar.sun.rise)}
+                  </span>
+                  <span style={{ fontSize: px(8), fontWeight: 400, color: colors.textDim }}>
+                    Golden {formatTime(goldenHours.morningStart)}-{formatTime(goldenHours.morningEnd)}
+                  </span>
+                </div>
 
-              {/* Coucher + Golden */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
-                <span style={{ fontSize: px(12), color: colors.accentOrange }}>●</span>
-                <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
-                  {formatTime(solunar.sun.set)}
-                </span>
-                <span
-                  style={{
-                    fontSize: px(8),
-                    fontWeight: 400,
-                    color: activity.isGoldenHour ? colors.accentOrange : colors.textDim,
-                  }}
-                >
-                  ({formatGoldenRange(goldenHours.eveningStart, goldenHours.eveningEnd)})
-                </span>
+                {/* Coucher */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: px(2) }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
+                    <span style={{ fontSize: px(12), color: colors.accentOrange }}>●</span>
+                    <span style={{ fontSize: px(9), fontWeight: 500, color: colors.textDim, textTransform: 'uppercase' }}>
+                      Coucher
+                    </span>
+                  </div>
+                  <span style={{ fontSize: px(13), fontWeight: 700, color: colors.textLight }}>
+                    {formatTime(solunar.sun.set)}
+                  </span>
+                  <span style={{ fontSize: px(8), fontWeight: 400, color: colors.textDim }}>
+                    Golden {formatTime(goldenHours.eveningStart)}-{formatTime(goldenHours.eveningEnd)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

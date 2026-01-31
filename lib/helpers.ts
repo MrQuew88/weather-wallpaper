@@ -34,6 +34,18 @@ export function getWindArrow(degrees: number): string {
   return arrows[index];
 }
 
+/**
+ * Convertit la direction du vent (en degrés) en label cardinal
+ * @param degrees - Direction du vent en degrés (0-360)
+ * @returns Direction cardinale (N, NE, E, SE, S, SO, O, NO)
+ */
+export function getWindDirectionLabel(degrees: number): string {
+  const normalized = ((degrees % 360) + 360) % 360;
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  const index = Math.round(normalized / 45) % 8;
+  return directions[index];
+}
+
 // ============================================================================
 // Conversion des codes météo WMO en emoji
 // ============================================================================
