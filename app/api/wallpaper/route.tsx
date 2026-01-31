@@ -1,12 +1,13 @@
 /**
  * Route API pour la génération du fond d'écran météo
- * Conversion directe du HTML Figma vers JSX Satori
+ * Mode Guide Brochet - avec indice d'activité et golden hours
  * Ratio d'échelle: 330×716px → 1290×2796px (×3.9)
  */
 
 import { ImageResponse } from '@vercel/og';
-import { getWeatherData } from '../../../lib/weather';
+import { getWeatherData, getWaterTemperature } from '../../../lib/weather';
 import { getSolunarData } from '../../../lib/solunar';
+import { calculatePikeActivity, getGoldenHours } from '../../../lib/activity';
 import {
   getWindArrow,
   getWeatherEmoji,
@@ -52,6 +53,7 @@ const colors = {
   dividerLight: 'rgba(148, 163, 184, 0.08)',
   moonDark: '#1e293b',
   moonLight: '#e2e8f0',
+  starEmpty: '#374151',
 };
 
 export async function GET(request: Request) {
@@ -88,10 +90,17 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    // Récupération des données
     const weather = await getWeatherData(lat, lon);
     const solunar = getSolunarData(lat, lon, new Date());
+    const waterTemp = await getWaterTemperature(lat, lon);
     const now = new Date();
 
+    // Calcul de l'indice d'activité brochet
+    const activity = calculatePikeActivity(weather, solunar, now);
+    const goldenHours = getGoldenHours(solunar.sun.rise, solunar.sun.set);
+
+    // Données solunar
     const nextMajor = getNextPeriod(solunar.major, now);
     const nextMinor = getNextPeriod(solunar.minor, now);
     const majorDisplay = formatSolunarPeriod(nextMajor?.period || null, now, nextMajor?.status || null);
@@ -99,6 +108,11 @@ export async function GET(request: Request) {
 
     const moonIllumination = solunar.moon.illumination;
     const moonGradientStop = 100 - moonIllumination;
+
+    // Formatage des golden hours
+    const formatGoldenRange = (start: Date, end: Date) => {
+      return `${formatTime(start)}-${formatTime(end)}`;
+    };
 
     return new ImageResponse(
       (
@@ -123,34 +137,79 @@ export async function GET(request: Request) {
               flexDirection: 'column',
               padding: `0 ${px(20)}px`,
               paddingBottom: px(24),
-              gap: px(20),
+              gap: px(16),
             }}
           >
-            {/* Location */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: px(2) }}>
-              <span
-                style={{
-                  fontSize: px(16),
-                  fontWeight: 800,
-                  color: colors.textPrimary,
-                  textTransform: 'uppercase',
-                  letterSpacing: px(0.24),
-                }}
-              >
-                {name}
-              </span>
-              {region && (
+            {/* Location + Activity */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: px(8) }}>
+              {/* Location */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: px(2) }}>
                 <span
                   style={{
-                    fontSize: px(12),
-                    fontWeight: 400,
-                    color: colors.textSecondary,
-                    letterSpacing: px(0.39),
+                    fontSize: px(16),
+                    fontWeight: 800,
+                    color: colors.textPrimary,
+                    textTransform: 'uppercase',
+                    letterSpacing: px(0.24),
                   }}
                 >
-                  {region}
+                  {name}
                 </span>
-              )}
+                {region && (
+                  <span
+                    style={{
+                      fontSize: px(12),
+                      fontWeight: 400,
+                      color: colors.textSecondary,
+                      letterSpacing: px(0.39),
+                    }}
+                  >
+                    {region}
+                  </span>
+                )}
+              </div>
+
+              {/* Activity Index */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: px(4), marginTop: px(6) }}>
+                {/* Stars + Label */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: px(8) }}>
+                  {/* Stars */}
+                  <div style={{ display: 'flex', gap: px(2) }}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: px(10),
+                          color: i <= activity.score ? colors.accentYellow : colors.starEmpty,
+                        }}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  {/* Label */}
+                  <span
+                    style={{
+                      fontSize: px(12),
+                      fontWeight: 800,
+                      color: activity.color,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {activity.label}
+                  </span>
+                </div>
+                {/* Main Factor */}
+                <span
+                  style={{
+                    fontSize: px(9),
+                    fontWeight: 400,
+                    color: colors.textMuted,
+                  }}
+                >
+                  {activity.mainFactor}
+                </span>
+              </div>
             </div>
 
             {/* Section Prévisions */}
@@ -161,7 +220,7 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: px(6),
-                  marginBottom: px(12),
+                  marginBottom: px(10),
                 }}
               >
                 <span
@@ -254,7 +313,7 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: px(6),
-                  marginBottom: px(12),
+                  marginBottom: px(10),
                 }}
               >
                 <span
@@ -276,7 +335,7 @@ export async function GET(request: Request) {
                 {/* Pression */}
                 <div
                   style={{
-                    width: px(90),
+                    width: waterTemp !== null ? px(68) : px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -310,7 +369,7 @@ export async function GET(request: Request) {
                 {/* Nuages */}
                 <div
                   style={{
-                    width: px(90),
+                    width: waterTemp !== null ? px(68) : px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -341,7 +400,7 @@ export async function GET(request: Request) {
                 {/* Précip */}
                 <div
                   style={{
-                    width: px(90),
+                    width: waterTemp !== null ? px(68) : px(90),
                     display: 'flex',
                     flexDirection: 'column',
                     gap: px(4),
@@ -368,6 +427,39 @@ export async function GET(request: Request) {
                     </span>
                   </div>
                 </div>
+
+                {/* Eau (si disponible) */}
+                {waterTemp !== null && (
+                  <div
+                    style={{
+                      width: px(68),
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: px(4),
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: px(10),
+                        fontWeight: 400,
+                        color: colors.textSecondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: px(0.5),
+                      }}
+                    >
+                      Eau
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: px(12), fontWeight: 800, color: colors.accentBlue }}>
+                        {Math.round(waterTemp)}
+                      </span>
+                      <span style={{ fontSize: px(8), fontWeight: 400, color: colors.textMuted, marginLeft: 2 }}>
+                        °C
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -379,7 +471,7 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: px(6),
-                  marginBottom: px(12),
+                  marginBottom: px(10),
                 }}
               >
                 <span
@@ -482,8 +574,8 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Section Soleil - layout horizontal */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: px(24) }}>
+            {/* Section Soleil - layout horizontal avec golden hours */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: px(16) }}>
               {/* Titre + divider */}
               <div style={{ display: 'flex', alignItems: 'center', gap: px(6) }}>
                 <span
@@ -500,31 +592,43 @@ export async function GET(request: Request) {
                 <div style={{ width: px(10), height: 1, background: colors.divider, display: 'flex' }} />
               </div>
 
-              {/* Lever */}
+              {/* Lever + Golden */}
               <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
                 <span style={{ fontSize: px(12), color: colors.accentYellow }}>●</span>
-                <span style={{ fontSize: px(10), fontWeight: 400, color: colors.textDim, textTransform: 'uppercase' }}>
-                  Lever
-                </span>
                 <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
                   {formatTime(solunar.sun.rise)}
                 </span>
+                <span
+                  style={{
+                    fontSize: px(8),
+                    fontWeight: 400,
+                    color: activity.isGoldenHour ? colors.accentYellow : colors.textDim,
+                  }}
+                >
+                  ({formatGoldenRange(goldenHours.morningStart, goldenHours.morningEnd)})
+                </span>
               </div>
 
-              {/* Coucher */}
+              {/* Coucher + Golden */}
               <div style={{ display: 'flex', alignItems: 'center', gap: px(3) }}>
                 <span style={{ fontSize: px(12), color: colors.accentOrange }}>●</span>
-                <span style={{ fontSize: px(10), fontWeight: 400, color: colors.textDim, textTransform: 'uppercase' }}>
-                  Coucher
-                </span>
                 <span style={{ fontSize: px(14), fontWeight: 700, color: colors.textLight }}>
                   {formatTime(solunar.sun.set)}
+                </span>
+                <span
+                  style={{
+                    fontSize: px(8),
+                    fontWeight: 400,
+                    color: activity.isGoldenHour ? colors.accentOrange : colors.textDim,
+                  }}
+                >
+                  ({formatGoldenRange(goldenHours.eveningStart, goldenHours.eveningEnd)})
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Safe zone bottom - 7% */}
+          {/* Safe zone bottom - 5% */}
           <div style={{ height: SAFE_ZONE_BOTTOM, display: 'flex', flexShrink: 0 }} />
         </div>
       ),

@@ -228,3 +228,33 @@ export async function getWeatherData(
     throw new Error('Échec de récupération météo: erreur inconnue');
   }
 }
+
+// ============================================================================
+// Température de l'eau (optionnel)
+// ============================================================================
+
+/**
+ * Récupère la température de l'eau via l'API Marine Open-Meteo
+ * Retourne null si non disponible (lacs intérieurs, erreur, etc.)
+ * @param lat - Latitude
+ * @param lon - Longitude
+ * @returns Température de l'eau en °C ou null
+ */
+export async function getWaterTemperature(
+  lat: number,
+  lon: number
+): Promise<number | null> {
+  try {
+    const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=water_temperature`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return null; // API marine non disponible pour ce lieu
+    }
+
+    const data = await response.json();
+    return data.current?.water_temperature ?? null;
+  } catch {
+    return null; // Pas disponible pour ce lieu (lac intérieur, etc.)
+  }
+}
