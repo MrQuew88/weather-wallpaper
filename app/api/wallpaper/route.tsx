@@ -53,23 +53,23 @@ export async function GET(request: Request) {
     // Charger les fonts JetBrains Mono depuis le dossier public
     const [fontRegular, fontMedium, fontSemiBold, fontBold, fontExtraBold] =
       await Promise.all([
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Regular.woff2`).then((res) => {
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Regular.ttf`).then((res) => {
           if (!res.ok) throw new Error(`Font Regular: ${res.status}`);
           return res.arrayBuffer();
         }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Medium.woff2`).then((res) => {
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Medium.ttf`).then((res) => {
           if (!res.ok) throw new Error(`Font Medium: ${res.status}`);
           return res.arrayBuffer();
         }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-SemiBold.woff2`).then((res) => {
+        fetch(`${baseUrl}/fonts/JetBrainsMono-SemiBold.ttf`).then((res) => {
           if (!res.ok) throw new Error(`Font SemiBold: ${res.status}`);
           return res.arrayBuffer();
         }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-Bold.woff2`).then((res) => {
+        fetch(`${baseUrl}/fonts/JetBrainsMono-Bold.ttf`).then((res) => {
           if (!res.ok) throw new Error(`Font Bold: ${res.status}`);
           return res.arrayBuffer();
         }),
-        fetch(`${baseUrl}/fonts/JetBrainsMono-ExtraBold.woff2`).then((res) => {
+        fetch(`${baseUrl}/fonts/JetBrainsMono-ExtraBold.ttf`).then((res) => {
           if (!res.ok) throw new Error(`Font ExtraBold: ${res.status}`);
           return res.arrayBuffer();
         }),
