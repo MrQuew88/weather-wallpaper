@@ -25,7 +25,7 @@ const HEIGHT = 2796;
 
 // Safe zones en pourcentage
 const SAFE_ZONE_TOP = Math.round(HEIGHT * 0.25);   // 25% = 699px
-const SAFE_ZONE_BOTTOM = Math.round(HEIGHT * 0.11); // 11% = 308px
+const SAFE_ZONE_BOTTOM = Math.round(HEIGHT * 0.05); // 5% = 140px
 
 // Ratio d'échelle (330px → 1290px)
 const SCALE = 3.9;
