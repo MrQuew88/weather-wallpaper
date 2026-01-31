@@ -52,26 +52,6 @@ export async function GET(request: Request) {
     const solunar = getSolunarData(lat, lon, new Date());
     const now = new Date();
 
-    // Charger les fonts JetBrains Mono (différents poids)
-    const [fontRegular, fontMedium, fontSemiBold, fontBold, fontExtraBold] =
-      await Promise.all([
-        fetch(
-          'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2'
-        ).then((res) => res.arrayBuffer()),
-        fetch(
-          'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsZ6Dhw.woff2'
-        ).then((res) => res.arrayBuffer()),
-        fetch(
-          'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsXCDhw.woff2'
-        ).then((res) => res.arrayBuffer()),
-        fetch(
-          'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUscqDhw.woff2'
-        ).then((res) => res.arrayBuffer()),
-        fetch(
-          'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsf-Dhw.woff2'
-        ).then((res) => res.arrayBuffer()),
-      ]);
-
     // Préparer les données solunar
     const nextMajor = getNextPeriod(solunar.major, now);
     const nextMinor = getNextPeriod(solunar.minor, now);
@@ -99,7 +79,7 @@ export async function GET(request: Request) {
             height: HEIGHT,
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'JetBrains Mono',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
             background: `linear-gradient(180deg, ${colors.bgDark} 0%, ${colors.bgMid} 30%, #0f1d2f 70%, #0d1926 100%)`,
             position: 'relative',
           }}
@@ -957,38 +937,6 @@ export async function GET(request: Request) {
       {
         width: WIDTH,
         height: HEIGHT,
-        fonts: [
-          {
-            name: 'JetBrains Mono',
-            data: fontRegular,
-            style: 'normal',
-            weight: 400,
-          },
-          {
-            name: 'JetBrains Mono',
-            data: fontMedium,
-            style: 'normal',
-            weight: 500,
-          },
-          {
-            name: 'JetBrains Mono',
-            data: fontSemiBold,
-            style: 'normal',
-            weight: 600,
-          },
-          {
-            name: 'JetBrains Mono',
-            data: fontBold,
-            style: 'normal',
-            weight: 700,
-          },
-          {
-            name: 'JetBrains Mono',
-            data: fontExtraBold,
-            style: 'normal',
-            weight: 800,
-          },
-        ],
       }
     );
   } catch (error) {
